@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ## setupVisit.py - bookkeeping for initiating a phoSim run in DC2-phoSim task
 ##
-
+##
 import os,sys,shutil,gzip
 
 print '\n\nWelcome to setupVisit.py\n========================\n'
