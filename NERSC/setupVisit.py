@@ -4,6 +4,14 @@
 ##
 import os,sys,shutil,gzip
 
+def bye():
+    print "\n\n\n"
+    print "Debug exit from setupVisit.py"
+    print "\n\n\n"
+    sys.exit()
+    pass
+
+
 print '\n\nWelcome to setupVisit.py\n========================\n'
 rc = 0
 
@@ -26,7 +34,6 @@ if rc <> 0 :
     log.error("Unable to set pipeline variable")
     sys.exit(99)
     pass
-
 
 
 ## Create Persistent data store directory structure for this invocation of phoSim
@@ -139,110 +146,35 @@ log.info('Extract visit data.')
 focalPlane=['R01_S00', 'R01_S01', 'R01_S02', 'R01_S10', 'R01_S11', 'R01_S12', 'R01_S20', 'R01_S21', 'R01_S22', 'R02_S00', 'R02_S01', 'R02_S02', 'R02_S10', 'R02_S11', 'R02_S12', 'R02_S20', 'R02_S21', 'R02_S22', 'R03_S00', 'R03_S01', 'R03_S02', 'R03_S10', 'R03_S11', 'R03_S12', 'R03_S20', 'R03_S21', 'R03_S22', 'R10_S00', 'R10_S01', 'R10_S02', 'R10_S10', 'R10_S11', 'R10_S12', 'R10_S20', 'R10_S21', 'R10_S22', 'R11_S00', 'R11_S01', 'R11_S02', 'R11_S10', 'R11_S11', 'R11_S12', 'R11_S20', 'R11_S21', 'R11_S22', 'R12_S00', 'R12_S01', 'R12_S02', 'R12_S10', 'R12_S11', 'R12_S12', 'R12_S20', 'R12_S21', 'R12_S22', 'R13_S00', 'R13_S01', 'R13_S02', 'R13_S10', 'R13_S11', 'R13_S12', 'R13_S20', 'R13_S21', 'R13_S22', 'R14_S00', 'R14_S01', 'R14_S02', 'R14_S10', 'R14_S11', 'R14_S12', 'R14_S20', 'R14_S21', 'R14_S22', 'R20_S00', 'R20_S01', 'R20_S02', 'R20_S10', 'R20_S11', 'R20_S12', 'R20_S20', 'R20_S21', 'R20_S22', 'R21_S00', 'R21_S01', 'R21_S02', 'R21_S10', 'R21_S11', 'R21_S12', 'R21_S20', 'R21_S21', 'R21_S22', 'R22_S00', 'R22_S01', 'R22_S02', 'R22_S10', 'R22_S11', 'R22_S12', 'R22_S20', 'R22_S21', 'R22_S22', 'R23_S00', 'R23_S01', 'R23_S02', 'R23_S10', 'R23_S11', 'R23_S12', 'R23_S20', 'R23_S21', 'R23_S22', 'R24_S00', 'R24_S01', 'R24_S02', 'R24_S10', 'R24_S11', 'R24_S12', 'R24_S20', 'R24_S21', 'R24_S22', 'R30_S00', 'R30_S01', 'R30_S02', 'R30_S10', 'R30_S11', 'R30_S12', 'R30_S20', 'R30_S21', 'R30_S22', 'R31_S00', 'R31_S01', 'R31_S02', 'R31_S10', 'R31_S11', 'R31_S12', 'R31_S20', 'R31_S21', 'R31_S22', 'R32_S00', 'R32_S01', 'R32_S02', 'R32_S10', 'R32_S11', 'R32_S12', 'R32_S20', 'R32_S21', 'R32_S22', 'R33_S00', 'R33_S01', 'R33_S02', 'R33_S10', 'R33_S11', 'R33_S12', 'R33_S20', 'R33_S21', 'R33_S22', 'R34_S00', 'R34_S01', 'R34_S02', 'R34_S10', 'R34_S11', 'R34_S12', 'R34_S20', 'R34_S21', 'R34_S22', 'R41_S00', 'R41_S01', 'R41_S02', 'R41_S10', 'R41_S11', 'R41_S12', 'R41_S20', 'R41_S21', 'R41_S22', 'R42_S00', 'R42_S01', 'R42_S02', 'R42_S10', 'R42_S11', 'R42_S12', 'R42_S20', 'R42_S21', 'R42_S22', 'R43_S00', 'R43_S01', 'R43_S02', 'R43_S10', 'R43_S11', 'R43_S12', 'R43_S20', 'R43_S21', 'R43_S22']
 
 
-################################################################################
-########## <DEVELOPMENT ONLY> ##################################################
-################################################################################
+visitFile = os.getenv('DC2_VISIT_DB')
+sensorList = []
+visitID = getVisit(stream,visitFile)
 
-#visitFile = os.getenv('DC2_VISIT_DB')
-#(visitID,sensorList) = getVisit(stream,visitFile)
-
-################################################################################
-############  R E M O V E   P R I O R   T O   P R O D U C T I O N  #############
-################################################################################
-
-## We do not yet know how the list of visitIDs will be presented for DC2
-## Also, will only the dithered subset of the focal plane be simulated?
-
-## For now, allow only *four* pre-packaged visits to be used
-print "\n\n\n\n\n   ********* DEVELOPMENT TEST **************\n"
-
-
-#### The very first three streams of DC1
-if stream == 0:
-    visitID=40336
-#    sensorList=['R01_S02']   # <--- initial single-sensor test
-    sensorList=['R01_S02', 'R02_S00', 'R02_S01', 'R02_S02', 'R03_S01', 'R03_S11', 'R03_S12', 'R03_S21', 'R03_S22', 'R13_S02', 'R13_S12', 'R14_S00', 'R14_S01', 'R14_S10', 'R14_S11', 'R14_S12', 'R14_S21', 'R14_S22', 'R24_S02']
-
-elif stream == 1:
-    visitID=40337
-    sensorList=['R01_S00', 'R01_S01', 'R01_S02', 'R01_S10', 'R01_S11', 'R01_S12', 'R01_S20', 'R01_S21', 'R01_S22', 'R02_S00', 'R02_S01', 'R02_S02', 'R02_S10', 'R02_S11', 'R02_S12', 'R02_S20', 'R02_S21', 'R02_S22', 'R03_S00', 'R03_S01', 'R03_S10', 'R03_S11', 'R03_S12', 'R03_S20', 'R03_S21', 'R03_S22', 'R10_S01', 'R10_S02', 'R10_S10', 'R10_S11', 'R10_S12', 'R10_S20', 'R10_S21', 'R10_S22', 'R11_S00', 'R11_S01', 'R11_S02', 'R11_S10', 'R11_S11', 'R11_S12', 'R11_S20', 'R11_S21', 'R11_S22', 'R12_S00', 'R12_S01', 'R12_S02', 'R12_S10', 'R12_S11', 'R12_S12', 'R12_S20', 'R12_S21', 'R12_S22', 'R13_S00', 'R13_S01', 'R13_S02', 'R13_S10', 'R13_S11', 'R13_S12', 'R13_S20', 'R13_S21', 'R13_S22', 'R14_S00', 'R14_S01', 'R14_S10', 'R14_S11', 'R14_S12', 'R14_S20', 'R14_S21', 'R14_S22', 'R20_S00', 'R20_S01', 'R20_S02', 'R20_S10', 'R20_S11', 'R20_S12', 'R20_S20', 'R20_S21', 'R20_S22', 'R21_S00', 'R21_S01', 'R21_S02', 'R21_S10', 'R21_S11', 'R21_S12', 'R21_S20', 'R21_S21', 'R21_S22', 'R22_S00', 'R22_S01', 'R22_S02', 'R22_S10', 'R22_S11', 'R22_S12', 'R22_S20', 'R22_S21', 'R22_S22', 'R23_S00', 'R23_S01', 'R23_S02', 'R23_S10', 'R23_S11', 'R23_S12', 'R23_S20', 'R23_S21', 'R23_S22', 'R24_S00', 'R24_S01', 'R24_S02', 'R24_S10', 'R24_S11', 'R24_S12', 'R24_S20', 'R24_S21', 'R24_S22', 'R30_S00', 'R30_S01', 'R30_S02', 'R30_S10', 'R30_S11', 'R30_S12', 'R30_S21', 'R30_S22', 'R31_S00', 'R31_S01', 'R31_S02', 'R31_S10', 'R31_S11', 'R31_S12', 'R31_S20', 'R31_S21', 'R31_S22', 'R32_S00', 'R32_S01', 'R32_S02', 'R32_S10', 'R32_S11', 'R32_S12', 'R32_S20', 'R32_S21', 'R32_S22', 'R33_S00', 'R33_S01', 'R33_S02', 'R33_S10', 'R33_S11', 'R33_S12', 'R33_S20', 'R33_S21', 'R33_S22', 'R34_S00', 'R34_S01', 'R34_S02', 'R34_S10', 'R34_S11', 'R34_S12', 'R34_S20', 'R34_S21', 'R41_S00', 'R41_S01', 'R41_S02', 'R41_S10', 'R41_S11', 'R41_S12', 'R41_S21', 'R41_S22', 'R42_S00', 'R42_S01', 'R42_S02', 'R42_S10', 'R42_S11', 'R42_S12', 'R42_S20', 'R42_S21', 'R42_S22', 'R43_S00', 'R43_S01', 'R43_S02', 'R43_S10', 'R43_S11', 'R43_S12', 'R43_S20', 'R43_S21']
-
-elif stream == 2:
-    visitID=40338
-    sensorList=['R12_S21', 'R12_S22', 'R13_S20', 'R20_S22', 'R21_S01', 'R21_S02', 'R21_S10', 'R21_S11', 'R21_S12', 'R21_S20', 'R21_S21', 'R21_S22', 'R22_S00', 'R22_S01', 'R22_S02', 'R22_S10', 'R22_S11', 'R22_S12', 'R22_S20', 'R22_S21', 'R22_S22', 'R23_S00', 'R23_S01', 'R23_S02', 'R23_S10', 'R23_S11', 'R23_S12', 'R23_S20', 'R23_S21', 'R23_S22', 'R24_S00', 'R24_S10', 'R24_S11', 'R24_S20', 'R24_S21', 'R24_S22', 'R30_S01', 'R30_S02', 'R30_S11', 'R30_S12', 'R30_S21', 'R30_S22', 'R31_S00', 'R31_S01', 'R31_S02', 'R31_S10', 'R31_S11', 'R31_S12', 'R31_S20', 'R31_S21', 'R31_S22', 'R32_S00', 'R32_S01', 'R32_S02', 'R32_S10', 'R32_S11', 'R32_S12', 'R32_S20', 'R32_S21', 'R32_S22', 'R33_S00', 'R33_S01', 'R33_S02', 'R33_S10', 'R33_S11', 'R33_S12', 'R33_S20', 'R33_S21', 'R33_S22', 'R34_S00', 'R34_S01', 'R34_S02', 'R34_S10', 'R34_S11', 'R34_S12', 'R34_S20', 'R34_S21', 'R41_S00', 'R41_S01', 'R41_S02', 'R41_S10', 'R41_S11', 'R41_S12', 'R41_S21', 'R41_S22', 'R42_S00', 'R42_S01', 'R42_S02', 'R42_S10', 'R42_S11', 'R42_S12', 'R42_S20', 'R42_S21', 'R42_S22', 'R43_S00', 'R43_S01', 'R43_S02', 'R43_S10', 'R43_S11', 'R43_S12', 'R43_S20', 'R43_S21']
-
-
-
-### A special stream known to require long execution time
-elif stream == 3:
-    visitID=1668469
-    sensorList=["R01_S00","R01_S10","R10_S00"]   # <-- known to require a long execution time (>5d @SLAC)
-
-
-
-
-### Seven "Seth Specials" (see github LSSTDESC/DC2_Repo issue #19)
-elif stream == 4:
-    visitID=270676
-    sensorList=['R41_S11', 'R41_S12', 'R41_S21', 'R41_S22', 'R42_S00', 'R42_S01', 'R42_S02', 'R42_S10', 'R42_S11', 'R42_S12', 'R42_S20', 'R42_S21', 'R42_S22', 'R43_S00', 'R43_S01', 'R43_S02', 'R43_S10', 'R43_S11', 'R43_S12', 'R43_S20', 'R43_S21']
-
-
-elif stream == 5:
-    visitID=194113
-    sensorList=['R01_S01', 'R01_S02', 'R01_S10', 'R01_S11', 'R01_S12', 'R01_S20', 'R01_S21', 'R01_S22', 'R02_S00', 'R02_S01', 'R02_S10', 'R02_S11', 'R02_S20', 'R02_S21', 'R02_S22', 'R10_S01', 'R10_S02', 'R10_S10', 'R10_S11', 'R10_S12', 'R10_S20', 'R10_S21', 'R10_S22', 'R11_S00', 'R11_S01', 'R11_S02', 'R11_S10', 'R11_S11', 'R11_S12', 'R11_S20', 'R11_S21', 'R11_S22', 'R12_S00', 'R12_S01', 'R12_S02', 'R12_S10', 'R12_S11', 'R12_S12', 'R12_S20', 'R12_S21', 'R12_S22', 'R13_S00', 'R13_S10', 'R13_S11', 'R13_S20', 'R13_S21', 'R20_S00', 'R20_S01', 'R20_S02', 'R20_S10', 'R20_S11', 'R20_S12', 'R20_S20', 'R20_S21', 'R20_S22', 'R21_S00', 'R21_S01', 'R21_S02', 'R21_S10', 'R21_S11', 'R21_S12', 'R21_S20', 'R21_S21', 'R21_S22', 'R22_S00', 'R22_S01', 'R22_S02', 'R22_S10', 'R22_S11', 'R22_S12', 'R22_S20', 'R22_S21', 'R22_S22', 'R23_S00', 'R23_S01', 'R23_S10', 'R23_S11', 'R23_S20', 'R23_S21', 'R30_S00', 'R30_S01', 'R30_S02', 'R30_S10', 'R30_S11', 'R30_S12', 'R30_S21', 'R30_S22', 'R31_S00', 'R31_S01', 'R31_S02', 'R31_S10', 'R31_S11', 'R31_S12', 'R31_S20', 'R31_S21', 'R31_S22', 'R32_S00', 'R32_S01', 'R32_S02', 'R32_S10', 'R32_S11', 'R32_S12', 'R32_S20', 'R32_S21', 'R32_S22', 'R33_S00', 'R33_S01', 'R33_S10', 'R33_S11', 'R33_S20', 'R41_S00', 'R41_S01', 'R41_S02', 'R41_S10', 'R41_S11', 'R41_S12', 'R41_S21', 'R41_S22', 'R42_S00', 'R42_S01', 'R42_S02', 'R42_S10', 'R42_S11', 'R42_S12', 'R42_S20']
-
-elif stream == 6:
-    visitID=220091
-    sensorList=['R03_S21', 'R03_S22', 'R11_S22', 'R12_S01', 'R12_S02', 'R12_S10', 'R12_S11', 'R12_S12', 'R12_S20', 'R12_S21', 'R12_S22', 'R13_S00', 'R13_S01', 'R13_S02', 'R13_S10', 'R13_S11', 'R13_S12', 'R13_S20', 'R13_S21', 'R13_S22', 'R14_S00', 'R14_S01', 'R14_S10', 'R14_S11', 'R14_S12', 'R14_S20', 'R14_S21', 'R14_S22', 'R21_S02', 'R21_S11', 'R21_S12', 'R21_S21', 'R21_S22', 'R22_S00', 'R22_S01', 'R22_S02', 'R22_S10', 'R22_S11', 'R22_S12', 'R22_S20', 'R22_S21', 'R22_S22', 'R23_S00', 'R23_S01', 'R23_S02', 'R23_S10', 'R23_S11', 'R23_S12', 'R23_S20', 'R23_S21', 'R23_S22', 'R24_S00', 'R24_S01', 'R24_S02', 'R24_S10', 'R24_S11', 'R24_S12', 'R24_S20', 'R24_S21', 'R24_S22', 'R31_S01', 'R31_S02', 'R31_S11', 'R31_S12', 'R31_S21', 'R31_S22', 'R32_S00', 'R32_S01', 'R32_S02', 'R32_S10', 'R32_S11', 'R32_S12', 'R32_S20', 'R32_S21', 'R32_S22', 'R33_S00', 'R33_S01', 'R33_S02', 'R33_S10', 'R33_S11', 'R33_S12', 'R33_S20', 'R33_S21', 'R33_S22', 'R34_S00', 'R34_S01', 'R34_S02', 'R34_S10', 'R34_S11', 'R34_S12', 'R34_S20', 'R34_S21', 'R41_S00', 'R41_S01', 'R41_S02', 'R41_S10', 'R41_S11', 'R41_S12', 'R41_S21', 'R41_S22', 'R42_S00', 'R42_S01', 'R42_S02', 'R42_S10', 'R42_S11', 'R42_S12', 'R42_S20', 'R42_S21', 'R42_S22', 'R43_S00', 'R43_S01', 'R43_S02', 'R43_S10', 'R43_S11', 'R43_S12', 'R43_S20', 'R43_S21']
-
-elif stream == 7:
-    visitID=220090
-    sensorList=['R01_S10', 'R01_S20', 'R10_S01', 'R10_S02', 'R10_S10', 'R10_S11', 'R10_S12', 'R10_S20', 'R10_S21', 'R10_S22', 'R11_S00', 'R11_S10', 'R11_S20', 'R20_S00', 'R20_S01', 'R20_S02', 'R20_S10', 'R20_S11', 'R20_S12', 'R20_S20', 'R20_S21', 'R20_S22', 'R21_S00', 'R21_S10', 'R21_S20', 'R21_S21', 'R30_S00', 'R30_S01', 'R30_S02', 'R30_S10', 'R30_S11', 'R30_S12', 'R30_S21', 'R30_S22', 'R31_S00', 'R31_S01', 'R31_S02', 'R31_S10', 'R31_S11', 'R31_S12', 'R31_S20', 'R31_S21', 'R31_S22', 'R32_S00', 'R32_S10', 'R32_S11', 'R32_S20', 'R32_S21', 'R32_S22', 'R41_S00', 'R41_S01', 'R41_S02', 'R41_S10', 'R41_S11', 'R41_S12', 'R41_S21', 'R41_S22', 'R42_S00', 'R42_S01', 'R42_S02', 'R42_S10', 'R42_S11', 'R42_S12', 'R42_S20', 'R42_S21', 'R42_S22', 'R43_S00', 'R43_S10', 'R43_S20']
-
-elif stream == 8:
-    visitID=233988
-    sensorList=['R32_S12', 'R32_S21', 'R32_S22', 'R33_S10', 'R33_S11', 'R33_S12', 'R33_S20', 'R33_S21', 'R33_S22', 'R34_S00', 'R34_S01', 'R34_S10', 'R34_S11', 'R34_S12', 'R34_S20', 'R34_S21', 'R41_S12', 'R41_S22', 'R42_S00', 'R42_S01', 'R42_S02', 'R42_S10', 'R42_S11', 'R42_S12', 'R42_S20', 'R42_S21', 'R42_S22', 'R43_S00', 'R43_S01', 'R43_S02', 'R43_S10', 'R43_S11', 'R43_S12', 'R43_S20', 'R43_S21']
-
-elif stream == 9:
-    visitID=201828
-    sensorList=['R01_S01', 'R01_S02', 'R01_S10', 'R01_S11', 'R01_S12', 'R01_S20', 'R01_S21', 'R01_S22', 'R02_S00', 'R02_S01', 'R02_S02', 'R02_S10', 'R02_S11', 'R02_S12', 'R02_S20', 'R02_S21', 'R02_S22', 'R03_S00', 'R03_S01', 'R03_S10', 'R03_S11', 'R03_S12', 'R03_S20', 'R03_S21', 'R03_S22', 'R10_S01', 'R10_S02', 'R10_S10', 'R10_S11', 'R10_S12', 'R10_S20', 'R10_S21', 'R10_S22', 'R11_S00', 'R11_S01', 'R11_S02', 'R11_S10', 'R11_S11', 'R11_S12', 'R11_S20', 'R11_S21', 'R11_S22', 'R12_S00', 'R12_S01', 'R12_S02', 'R12_S10', 'R12_S11', 'R12_S12', 'R12_S20', 'R12_S21', 'R12_S22', 'R13_S00', 'R13_S01', 'R13_S02', 'R13_S10', 'R13_S11', 'R13_S12', 'R13_S20', 'R13_S21', 'R13_S22', 'R14_S00', 'R14_S01', 'R14_S10', 'R14_S20', 'R20_S00', 'R20_S01', 'R20_S02', 'R20_S10', 'R20_S11', 'R20_S12', 'R20_S20', 'R20_S21', 'R20_S22', 'R21_S00', 'R21_S01', 'R21_S02', 'R21_S10', 'R21_S11', 'R21_S12', 'R21_S20', 'R21_S21', 'R21_S22', 'R22_S00', 'R22_S01', 'R22_S02', 'R22_S10', 'R22_S11', 'R22_S12', 'R22_S20', 'R22_S21', 'R22_S22', 'R23_S00', 'R23_S01', 'R23_S02', 'R23_S10', 'R23_S11', 'R23_S12', 'R23_S20', 'R23_S21', 'R23_S22', 'R24_S00', 'R24_S10', 'R24_S20', 'R24_S21', 'R24_S22', 'R30_S00', 'R30_S01', 'R30_S02', 'R30_S10', 'R30_S11', 'R30_S12', 'R30_S21', 'R30_S22', 'R31_S00', 'R31_S01', 'R31_S02', 'R31_S10', 'R31_S11', 'R31_S12', 'R31_S20', 'R31_S21', 'R31_S22', 'R32_S00', 'R32_S01', 'R32_S02', 'R32_S10', 'R32_S11', 'R32_S12', 'R32_S20', 'R32_S21', 'R32_S22', 'R33_S00', 'R33_S01', 'R33_S02', 'R33_S10', 'R33_S11', 'R33_S12', 'R33_S20', 'R33_S21', 'R33_S22', 'R34_S00', 'R34_S01', 'R34_S02', 'R34_S10', 'R34_S11', 'R34_S12', 'R34_S20', 'R34_S21', 'R41_S00', 'R41_S01', 'R41_S02', 'R41_S10', 'R41_S11', 'R41_S12', 'R41_S21', 'R41_S22', 'R42_S00', 'R42_S01', 'R42_S02', 'R42_S10', 'R42_S11', 'R42_S12', 'R42_S20', 'R42_S21', 'R42_S22', 'R43_S00', 'R43_S01', 'R43_S02', 'R43_S10', 'R43_S11', 'R43_S12', 'R43_S20', 'R43_S21']
-
-elif stream == 10:
-    visitID=300306
-    sensorList=['R10_S02', 'R10_S10', 'R10_S11', 'R10_S12', 'R10_S20', 'R10_S21', 'R10_S22', 'R11_S00', 'R11_S01', 'R11_S10', 'R11_S11', 'R11_S12', 'R11_S20', 'R11_S21', 'R11_S22', 'R12_S10', 'R12_S11', 'R12_S20', 'R12_S21', 'R12_S22', 'R20_S00', 'R20_S01', 'R20_S02', 'R20_S10', 'R20_S11', 'R20_S12', 'R20_S20', 'R20_S21', 'R20_S22', 'R21_S00', 'R21_S01', 'R21_S02', 'R21_S10', 'R21_S11', 'R21_S12', 'R21_S20', 'R21_S21', 'R21_S22', 'R22_S00', 'R22_S01', 'R22_S02', 'R22_S10', 'R22_S11', 'R22_S12', 'R22_S20', 'R22_S21', 'R22_S22', 'R23_S00', 'R23_S10', 'R23_S11', 'R23_S20', 'R23_S21', 'R30_S00', 'R30_S01', 'R30_S02', 'R30_S10', 'R30_S11', 'R30_S12', 'R30_S21', 'R30_S22', 'R31_S00', 'R31_S01', 'R31_S02', 'R31_S10', 'R31_S11', 'R31_S12', 'R31_S20', 'R31_S21', 'R31_S22', 'R32_S00', 'R32_S01', 'R32_S02', 'R32_S10', 'R32_S11', 'R32_S12', 'R32_S20', 'R32_S21', 'R32_S22', 'R33_S00', 'R33_S01', 'R33_S10', 'R33_S11', 'R33_S12', 'R33_S20', 'R33_S21', 'R33_S22', 'R41_S00', 'R41_S01', 'R41_S02', 'R41_S10', 'R41_S11', 'R41_S12', 'R41_S21', 'R41_S22', 'R42_S00', 'R42_S01', 'R42_S02', 'R42_S10', 'R42_S11', 'R42_S12', 'R42_S20', 'R42_S21', 'R42_S22', 'R43_S00', 'R43_S01', 'R43_S02', 'R43_S10', 'R43_S11', 'R43_S20', 'R43_S21']
-
-elif stream == 11:
-    visitID=138143
-    sensorList=focalPlane
-
-
-else:
-    print "Stream ",stream," has no catalog!  Exiting..."
-    sys.exit(1)
-
-################################################################################
-########## </DEVELOPMENT ONLY> #################################################
-################################################################################
 
 visitID = str(visitID)
 print 'visitID = ',visitID,', type(visitID) = ',type(visitID)
-print 'sensorList[',len(sensorList),'] = ',sensorList
+if len(sensorList) > 0:
+    print 'sensorList[',len(sensorList),'] = ',sensorList
+else:
+    print 'sensorList will be created after phoSim trim completes'
+    pass
+
 
 ## Package up the sensorList into variables of <990 characters each (email limitation)
 ### Figure 8 characters/sensor, e.g. R01_S12 plus a comma
 ### 189 sensors would then be 1511 characters long
 if len(sensorList) <= 100:
-    foo = ','.join(sensorList)
-    bar = ''
+    sl1 = ','.join(sensorList)
+    sl2 = ''
 else:
-    foo = ','.join(sensorList[:100])
-    bar = ','.join(sensorList[100:])
+    sl1 = ','.join(sensorList[:100])
+    sl2 = ','.join(sensorList[100:])
     pass
-print 'foo = ',foo
-print 'bar = ',bar
-cmd = 'pipelineSet DC2_SENSORLIST_1 '+foo
+print 'sensor list part 1 = ',sl1
+print 'sensor list part 2 = ',sl2
+cmd = 'pipelineSet DC2_SENSORLIST_1 '+sl1
 rc1 = os.system(cmd)
-cmd = 'pipelineSet DC2_SENSORLIST_2 '+bar
+cmd = 'pipelineSet DC2_SENSORLIST_2 '+sl2
 rc2 = os.system(cmd)
 cmd = 'pipelineSet DC2_NUM_SENSORS '+str(len(sensorList))
 rc3 = os.system(cmd)
@@ -266,20 +198,20 @@ if os.getenv('PHOSIM_IC_GEN') == 'STATIC':
 elif os.getenv('PHOSIM_IC_GEN') == 'DYNAMIC':
     print 'Using dymanically generated instance catalog'
 
-    cmd = os.path.join(os.getenv('DC2_CONFIGDIR'),'generateDc1InstCat.sh')
+    cmd = os.path.join(os.getenv('DC2_CONFIGDIR'),'genIC.sh')
     print 'cmd = ',cmd
+
     icDir = os.path.join(scrDir,'instCat')
     print 'icDir = ',icDir
-    icName = 'phosim_cat_'+visitID+'.txt'
-    print 'icName = ',icName
-    icSelect = os.path.join(icDir,icName)
-    print 'icSelect = ',icSelect
     minMag = os.getenv('DC2_MINMAG')
     print 'minMag = ',minMag
-    opts = ' --db '+os.getenv('DC2_OPSIM_DB')+' --out '+icDir+' --id '+visitID+' --min_mag '+minMag
+    opts = ' --db '+os.getenv('DC2_OPSSIM_DB')
+    opts += ' --out '+icDir
+    opts += ' --id '+visitID
+    #opts += ' --min_mag '+minMag
     cmd += opts
     log.info('Generate instanceCatalog.')
-    print cmd
+    print 'final cmd = ',cmd
 
     sys.stdout.flush()
     rc = os.system(cmd)
@@ -292,6 +224,7 @@ elif os.getenv('PHOSIM_IC_GEN') == 'DYNAMIC':
     pass
 
 
+bye()
 
 ## Preserve the instance catalog info for subsequent processing steps
 cmd = 'pipelineSet DC2_INSTANCE_CATALOG '+icSelect

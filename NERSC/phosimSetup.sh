@@ -2,6 +2,7 @@
 
 ## Select phoSim version
 version=v3.7.1   # Nov 2017
+version=v3.7.6   # 6 Dec 2017
 
 ## Select compiler used to build phoSim
 #compiler=gcc
@@ -20,6 +21,7 @@ else
     mode=interactive
 fi
 
+echo "Running on Cori-"$node
 
 ## Code pointers
 arch=cori-${node}-${compiler}
