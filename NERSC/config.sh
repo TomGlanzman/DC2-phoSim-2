@@ -1,21 +1,35 @@
 # config.sh - general set up for phoSim task
 
 ## Prepare for phoSim
-###  Hanma's visit DB of obsHistIDs and lists of sensors
-export DC2_VISIT_DB='/global/common/cori/contrib/lsst/production/DC2/visitDBs/2017-01-29_chipPerVisitData_newAfterburnerOutput_fID1447_RandomDitherFieldPerVisit_randomRotDithered_nonDiscRegion_131052TotChipsToSimulate.pickle'
+
+## Git repository containing visit lists and instanceCatalog generator
+export DC2_ROOT='/global/projecta/projectdirs/lsst/production/DC2'
+export DC2_REPO=${DC2_ROOT}'/DC2_Repo/scripts/protoDC2'
+
+## Select which to use for this task (u,g,r,i,z,y)
+export DC2_REPO_FILTER_LIST="u g r i z y"
+export DC2_REPO_FILTER=u
+
+## Visit lists
+export DC2_VISIT_DB=${DC2_REPO}/"protoDC2_visits_${DC2_REPO_FILTER}-band.txt"
+
+
+echo 'DC2_VISIT_DB = '$DC2_VISIT_DB
 
 ##
 ### Instance Catalog
 ##
-export PHOSIM_IC_GEN='STATIC'
+export PHOSIM_IC_GEN='DYNAMIC'
+export PHOSIM_IC_GENERATOR=${DC2_REPO}'/generateDc2InstCat.py'
+export PHOSIM_IC_GCR_CATALOGS=${DC2_ROOT}'/gcr-catalogs'
 
 ## Dynamic Instance Catalogs...
 ### OpSim DB for generating instanceCatalog
-export DC2_OPSIM_DB='/global/common/cori/contrib/lsst/production/DC2/opsimDBs/minion_1016_sqlite_new_dithers.db'
-export DC2_OPSIM_DB='/global/cscratch1/sd/desc/opsimDBs/minion_1016_sqlite_new_dithers.db'
+export DC2_OPSSIM_DB='/global/projecta/projectdirs/lsst/groups/SSim/DC1/minion_1016_sqlite_new_dithers.db'
 
 ## minimum magnitude (max brightness) for objects in sky catalog
 export DC2_MINMAG=10.0
+
 
 ## Static Instance Catalogs...
 ## 3/27/2017 - Mustafa's private scratch area for collecting instanceCatalogs

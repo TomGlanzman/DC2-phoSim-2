@@ -33,46 +33,18 @@ def getVisit(stream, visitFile):
 
     print 'Entering getVisit:\n   stream ',stream,'\n   visitFile ',visitFile
 
-    data = pickle.load(open(visitFile,'rb'))
-    obsHistIDs = data['obsHistID']
-    chipNames = data['chipNames']
+    # Open & read visit list
+    fd = open(visitFile,'r')
+    vList = fd.readlines()
+    fd.close()
+
+    print "     visit file contains ",len(vList)," visits."
+
+    # Select visit number (obsHistID) index by stream #
+    obsHistID = vList[stream].split()[0]
+    print "     stream ",stream,' corresponds to visit (obsHistID) = ',obsHistID
+    print "=============================\n"
+    # Return obsHistID
+    return obsHistID
 
 
-    numVisits = len(obsHistIDs)
-
-    if len(obsHistIDs) != len(chipNames):
-        print "%ERROR: #obsHistIDs =/= #chipNames"
-        print 'len(obsHistIDs) = ',len(obsHistIDs)
-        print 'len(chipNames) = ',len(chipNames)
-        sys.exit(1)
-        pass
-
-    print 'Number of visits in visit file = ',numVisits
-    if stream > numVisits-1:
-        print "%ERROR: stream number too large"
-        sys.exit(1)
-        pass
-
-    ## Select visit
-
-    obsHistID = obsHistIDs[stream]
-    chipList = chipNames[stream]
-
-    print 'stream = ',stream
-    print 'obsHistID = ',obsHistID
-    #print 'chipList = ',chipList
-
-
-    phoSimSensorList = []
-    for chip in chipList:
-        #print 'chip = ',chip
-        numChips = len(chip)
-        #print 'Number of chips to sim in this visit = ',numChips
-        sensorID = dm2phosim(chip)
-        #print 'sensorID = ',sensorID
-        if sensorID != None: phoSimSensorList.append(sensorID)
-        pass
-
-    print 'Number of sensors to sim = ',len(phoSimSensorList)
-    print 'List of sensors to simulate this visit:\n',phoSimSensorList
-    return (obsHistID,phoSimSensorList)
