@@ -1,2 +1,2 @@
 # DC2-phoSim-2
-This is based on the DC1 production workflow (SLAC Pipeline task DC1-phoSim-3), but modified for a DC2 environment
+This is a workflow to support phoSim image production for the DESC DC2 campaign.  The workflow engine resides and runs at SLAC but all of the heavy lifting is performed on cori-haswell and cori-knl at NERSC.  This page contains more detail: https://confluence.slac.stanford.edu/x/Zq_bDQ
