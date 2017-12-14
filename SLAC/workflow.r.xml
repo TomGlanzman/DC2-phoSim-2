@@ -4,14 +4,14 @@
           xs:schemaLocation="http://glast-ground.slac.stanford.edu/pipeline 
           http://srs.slac.stanford.edu/Pipeline-II/schemas/2.1/pipeline.xsd">
 
-    <task name="DC2-phoSim-2.r" type="LSST" version="0.200">
-        <notation>Generate phoSim images for DESC DC2 proto</notation> 
+    <task name="DC2-phoSim-2-r" type="LSST" version="0.900">
+        <notation>Generate r-filter phoSim images for DESC DC2</notation> 
 
         <variables>
 	    <var name="DC2_FILTER">r</var>
 
 	    <var name="WORKFLOW">DC2-phoSim-2</var>
-            <var name="TASKNAME">${WORKFLOW}.${DC2_FILTER}</var>
+            <var name="TASKNAME">${WORKFLOW}-${DC2_FILTER}</var>
 
             <!-- Where/how will jobs be run? 
               CORI = cori-haswell shared queue
@@ -34,23 +34,39 @@
 
             <var name="DC2_SCONFIGDIR">${DC2_SWORKFLOW}/config</var>
 
-            <!-- SLURM options for NERSC batch -->
-            <var name="BATCH_QUEUE">shared</var>
-            <var name="QOS">normal</var>
-            <var name="PARTITION">${JOBSITE=="CORIP" ? " -p phoSim " : " -p ${BATCH_QUEUE} | --qos=${QOS} "}</var>
+            <!-- SLURM options for NERSC batch (ignored by Pilots) -->
+            <var name="BATCH_QUEUE">shared</var>  <!-- (ignored by Pilots) -->
+            <var name="QOS">normal</var>          <!-- (ignored by Pilots) -->
+            <var name="PARTITIONH">${JOBSITE=="CORIP" ? " -p phoSimH " : " -p ${BATCH_QUEUE} | --qos=${QOS} "}</var>
+            <var name="PARTITIONK">${JOBSITE=="CORIP" ? " -p phoSimK " : " -p ${BATCH_QUEUE} | --qos=${QOS} "}</var>
 
-            <var name="BATCH_OPTIONS"> -L SCRATCH,projecta | -C knl </var>
+            <var name="BATCH_OPTIONS_H"> -L SCRATCH,projecta | -C haswell </var>
+            <var name="BATCH_OPTIONS_K"> -L SCRATCH,projecta | -C knl </var>
+
             <var name="EXTRA_SETUP">${JOBSITE=="CORIP" ? " " : " -c 3 "}</var>
-            <var name="MAXCPU_SETUP">7200</var> <!-- wall clock time limit in seconds-->
-            <var name="MAXCPU_TRIM">600</var> <!-- wall clock time limit in seconds -->
-            <var name="MAXCPU_RAYTRACE">43200</var> <!-- wall clock time limit in seconds -->
+
+	    <!-- MAXCPU time in seconds - used for scheduling but not enforced by pilot jobs -->
+            <var name="MAXCPU_SETUP">1800</var>
+            <var name="MAXCPU_TRIM">600</var>
+            <var name="MAXCPU_RAYTRACE">12600</var>
             <!-- Note that native SLURM times are in mm, mm:ss, hh:mm:ss, or dd-hh:mm:ss -->
 
-            <var name="MAXMEM">2000000</var>   <!-- kB, but SLURM memory in MB -->
+	    <!-- MAXTIME is wall clock time in seconds - used for scheduling but not enforced by pilot jobs -->
+            <var name="MAXTIME_SETUP">1800</var>
+            <var name="MAXTIME_TRIM">600</var>
+            <var name="MAXTIME_RAYTRACE">12600</var>
+            <!-- Note that native SLURM times are in mm, mm:ss, hh:mm:ss, or dd-hh:mm:ss -->
+
+	    <!-- MAXMEM in kB - used for scheduling but not enforced by pilot jobs -->
+            <var name="MAXMEM_SETUP">2000000</var>
+            <var name="MAXMEM_TRIM">2000000</var>
+            <var name="MAXMEM_RAYTRACE">4000000</var>
+	    <!-- Note that SLURM units are MB -->
+
             <var name="NTHREADS">8</var>  <!-- number of threads for raytrace -->
 
             <!-- LSF options for SLAC batch -->
-            <var name="MAXCPU">1000</var> <!-- wall clock time limit in seconds-->
+            <var name="MAXCPU">100</var> <!-- wall clock time limit in seconds-->
             <var name="SBATCH_OPTIONS"></var>
 
             <var name="DC2_SIXDIGSTREAM">${format(pipeline.stream,&quot;%06d&quot;)}</var>
@@ -59,8 +75,11 @@
 
         <process name="setupVisit" site="${JOBSITE}">
           <notation>Setup phoSim inputs and prepare for parallelization</notation>
-          <job maxCPU="${MAXCPU_SETUP}" batchOptions="${BATCH_OPTIONS} | ${PARTITION} | ${EXTRA_SETUP}" 
-               executable="${DC2_CONFIGDIR}/setupVisit.sh"/>
+          <job maxCPU="${MAXCPU_SETUP}" 
+	       maxMemory="${MAXMEM_SETUP}" 
+	       batchOptions="${BATCH_OPTIONS_H} | ${PARTITIONH} | ${EXTRA_SETUP}" 
+               executable="${DC2_CONFIGDIR}/setupVisit.sh"
+	       />
         </process>
 
 
@@ -81,8 +100,10 @@ execfile(DC2_SCONFIGDIR+"/launchTrim.jy")
 
         <process name="finishVisit" site="${JOBSITE}">
           <notation>Setup phoSim inputs and prepare for parallelization</notation>
-          <job maxCPU="${MAXCPU}" batchOptions="${BATCH_OPTIONS} | ${PARTITION}" 
-               executable="${DC2_CONFIGDIR}/finishVisit.sh"/>
+          <job maxCPU="${MAXCPU}" 
+	       batchOptions="${BATCH_OPTIONS_H} | ${PARTITIONH}" 
+               executable="${DC2_CONFIGDIR}/finishVisit.sh"
+	       />
           <depends>
             <after process="trim.trimDone-jy" status="SUCCESS"/>
           </depends>
@@ -94,8 +115,11 @@ execfile(DC2_SCONFIGDIR+"/launchTrim.jy")
 
             <process name="RunTrim" site="${JOBSITE}">
               <notation>Trim instance catalog for this visit</notation>
-              <job maxCPU="${MAXCPU_TRIM}" batchOptions="${BATCH_OPTIONS} | -c 2 | ${PARTITION}" 
-                   executable="${DC2_CONFIGDIR}/runTrim.sh"/>
+              <job maxCPU="${MAXCPU_TRIM}" 
+		   maxMemory="${MAXMEM_TRIM}"
+		   batchOptions="${BATCH_OPTIONS_K} | ${PARTITIONK | -c 2 }" 
+                   executable="${DC2_CONFIGDIR}/runTrim.sh"
+		   />
             </process>
 
 
@@ -132,8 +156,10 @@ print 'Dummy scriptlet (allows sub-subtask dependency)'
                 <process name="RunRaytrace" site="${JOBSITE}">
                     <notation>Combined raytrace and e2adc processing steps</notation>
                     <job maxCPU="${MAXCPU_RAYTRACE}" 
-                         batchOptions="${BATCH_OPTIONS} | ${PARTITION} | -c ${NTHREADS}" 
-                         executable="${DC2_CONFIGDIR}/runRaytrace.sh"/>
+			 maxMemory="${MAXMEM_RAYTRACE}"
+                         batchOptions="${BATCH_OPTIONS_K} | ${PARTITIONK} | -c ${NTHREADS}" 
+                         executable="${DC2_CONFIGDIR}/runRaytrace.sh"
+			 />
                 </process>
 
 
