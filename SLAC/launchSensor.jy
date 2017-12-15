@@ -23,6 +23,9 @@ print 'Number of trim jobs = ',ntrims
 nsnap = setupVisit.getVariable('DC2_NSNAP')
 print 'Number of snaps per visit = ',nsnap
 
+nsnap = setupVisit.getVariable('DC2_MINSOURCE')
+print 'Minimum # sources/sensor to enable its simulation = ',minsource
+
 visit = setupVisit.getVariable('DC2_OBSHISTID')
 print 'Visit number (obshistid) = ',visit
 
