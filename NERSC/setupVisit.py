@@ -147,11 +147,9 @@ focalPlane=['R01_S00', 'R01_S01', 'R01_S02', 'R01_S10', 'R01_S11', 'R01_S12', 'R
 
 
 visitFile = os.getenv('DC2_VISIT_DB')
-sensorList = []
-visitID = getVisit(stream,visitFile)
+sensorList = list(focalPlane)        # start off assuming we simulate the entire focal plane; will be trimmed later
+visitID = str(getVisit(stream,visitFile))
 
-
-visitID = str(visitID)
 print 'visitID = ',visitID,', type(visitID) = ',type(visitID)
 if len(sensorList) > 0:
     print 'sensorList[',len(sensorList),'] = ',sensorList
@@ -186,12 +184,13 @@ if rc1 <> 0 or rc2 <> 0 or rc3 <> 0:
 
 ##  Set up phoSim instanceCatalog
 
+icName = 'phosim_cat_'+visitID+'.txt'
+print 'icName = ',icName
+
 if os.getenv('PHOSIM_IC_GEN') == 'STATIC':
     print 'Using statically generated instance catalog'
     icDir = os.getenv('PHOSIM_CATALOGS')+'/'+visitID
     print 'icDir = ',icDir
-    icName = 'phosim_cat_'+visitID+'.txt'
-    print 'icName = ',icName
     icSelect = os.path.join(icDir,icName)
     print 'icSelect = ',icSelect
     
@@ -203,12 +202,16 @@ elif os.getenv('PHOSIM_IC_GEN') == 'DYNAMIC':
 
     icDir = os.path.join(scrDir,'instCat')
     print 'icDir = ',icDir
+    icSelect = os.path.join(icDir,icName)
+    print 'icSelect = ',icSelect
     minMag = os.getenv('DC2_MINMAG')
     print 'minMag = ',minMag
     opts = ' --db '+os.getenv('DC2_OPSSIM_DB')
     opts += ' --out '+icDir
     opts += ' --id '+visitID
-    #opts += ' --min_mag '+minMag
+#    opts += ' --descqa_cat_file protoDC2'
+    opts += ' --descqa_cat_file proto-dc2_v2.1.1'
+#    opts += ' --min_mag '+minMag
     cmd += opts
     log.info('Generate instanceCatalog.')
     print 'final cmd = ',cmd
@@ -221,10 +224,16 @@ elif os.getenv('PHOSIM_IC_GEN') == 'DYNAMIC':
         log.error('Failed to generate instance catalog.')
         sys.exit(1)
         pass
+
+    # Check that instanceCatalog was produced as expected
+    if not os.path.isfile(icSelect):
+        log.error('Expected IC file not produced')
+        print icSelect
+        sys.exit(1)
+        pass
+
     pass
 
-
-bye()
 
 ## Preserve the instance catalog info for subsequent processing steps
 cmd = 'pipelineSet DC2_INSTANCE_CATALOG '+icSelect
@@ -249,18 +258,19 @@ if rc <> 0 :
 icScratch = icSelect
 
 
-if icScratch.endswith('.gz'):
-    icNew = os.path.splitext(icScratch)[0]
-    print 'icNew = ',icNew
-    print 'icScratch = ',icScratch
-    inF = gzip.open(icScratch,'rb')
-    outF = open(icNew,'wb')
-    outF.write(inF.read())
-    inF.close()
-    outF.close()
-    os.remove(icScratch)
-    icScratch = icNew
-    pass
+## No longer needed: all top-level ICs are now .txt
+#if icScratch.endswith('.gz'):
+#    icNew = os.path.splitext(icScratch)[0]
+#    print 'icNew = ',icNew
+#    print 'icScratch = ',icScratch
+#    inF = gzip.open(icScratch,'rb')
+#    outF = open(icNew,'wb')
+#    outF.write(inF.read())
+#    inF.close()
+#    outF.close()
+#    os.remove(icScratch)
+#    icScratch = icNew
+#    pass
 
 
 ## Parse the first part of the instanceCatalog and extract a few items
@@ -269,7 +279,11 @@ nic = 0
 visit = None
 nsnap = None
 cfilter = None
-log.info('Configuration part of instanceCatalog:')
+cfilterNum = None
+minsource = None
+filterList = os.getenv("DC2_FILTER_LIST").split()
+print 'filterList = ',filterList
+log.info('Content of top-level instanceCatalog:')
 with open(icScratch,'r') as fp:
     for line in fp:
         if line.startswith('object'): break
@@ -278,7 +292,11 @@ with open(icScratch,'r') as fp:
         ic[entry[0]] = entry[1]
         if entry[0] == 'obshistid':visit = entry[1]
         if entry[0] == 'nsnap':nsnap = entry[1]
-        if entry[0] == 'filter':cfilter = entry[1]
+        if entry[0] == 'filter':
+            cfilter = filterList[int(entry[1])]
+            cfilterNum = entry[1]
+            pass
+        if entry[0] == 'minsource':minsource = entry[1]
         print entry[0],' ',entry[1]
         nic =+ 1
         pass
@@ -288,6 +306,8 @@ print '\n============================='
 print 'visit (obshistid) = ',visit
 print 'nsnap = ',nsnap
 print 'filter = ',cfilter
+print 'filter# = ',cfilterNum
+print 'minsource = ',minsource
 print '=============================\n'
 
 ## Pass filter, nsnap and obshistid to workflow engine for subsequent steps
@@ -312,6 +332,20 @@ if rc <> 0 :
     log.error("Unable to set pipeline variable \n $%s",cmd)
     sys.exit(99)
     pass
+cmd = 'pipelineSet DC2_FILTER_NUM '+cfilterNum
+print cmd
+rc = os.system(cmd)
+if rc <> 0 :
+    log.error("Unable to set pipeline variable \n $%s",cmd)
+    sys.exit(99)
+    pass
+cmd = 'pipelineSet DC2_MINSOURCE '+minsource
+print cmd
+rc = os.system(cmd)
+if rc <> 0 :
+    log.error("Unable to set pipeline variable \n $%s",cmd)
+    sys.exit(99)
+    pass
 
 
 
@@ -327,7 +361,7 @@ sys.stdout.flush()
 cf = {}
 with open(cfScratch,'r') as fp:
     for line in fp:
-        print line
+        print line.strip()
         if len(line.strip()) == 0 or line.startswith('#'):continue
         entry=line.strip().split()
         cf[entry[0]] = None
@@ -363,7 +397,11 @@ cmd = os.path.join(os.getenv('PHOSIM_ROOT'),'phosim.py')
 
 ## Global phoSim options
 ##   -g condor causes batch files to be created for trim/raytrace/e2adc steps
-opts = ' -g condor -o '+scr_output+' -w '+scr_work+' -c '+cfScratch+' --checkpoint=0 '
+opts = ' -g condor '
+opts += ' -o '+scr_output
+opts += ' -w '+scr_work
+opts += ' -c '+cfScratch
+opts += ' --checkpoint=0 '
 #opts += ' --sed='+os.getenv('PHOSIM_SEDS')+' '
 
 if os.getenv('PHOSIM_E2ADC') == 0:

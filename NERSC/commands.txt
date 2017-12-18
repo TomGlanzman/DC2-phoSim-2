@@ -1,5 +1,5 @@
 # commands.txt - phoSim commands/physics-overrides
-# 11/13/2017 -- clone from DC1->DC2, add in 'quickbackground' config
+# 12/14/2017 first guess for DC2
 
 # Enable centroid file
 centroidfile 1
@@ -8,11 +8,11 @@ centroidfile 1
 cleardefects
 fringing 0
 
+# Enable brighter/fatter
+chargesharing 1
+
 # Disable dirt
 contaminationmode 0
-
-# Set the nominal dark sky brightness
-zenith_v 21.8
 
 # Quick background
 backalpha 0.1

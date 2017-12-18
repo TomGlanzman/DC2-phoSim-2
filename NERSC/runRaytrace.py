@@ -23,11 +23,12 @@ outList = []         # full final path/filename of data products
 
 ## Loop over exposures (snaps) for this visit
 nsnaps = os.getenv('DC2_NSNAP')
-log.info('There are '+nsnaps+' exposures for this visit')
+log.info('Number of exposures for this visit: '+nsnaps)
 for snap in range(0,int(nsnaps)):
-    log.info('Start exposure '+str(snap))
+    log.info('Start raytrace for exposure '+str(snap))
 
     ## phoSim raytrace
+    rc = 0
     rc = runPhosimStep.runPhosimStep('raytrace',snap)
     if rc != 0: sys.exit(1)
 
@@ -41,7 +42,7 @@ for snap in range(0,int(nsnaps)):
 
     ## Collect phoSim output data product file names
     exposure = "%03d" % snap
-    core = os.getenv('DC2_OBSHISTID')+'_f'+os.getenv('DC2_FILTER')+'_'+os.getenv('DC2_SENSORID')+'_E'+exposure
+    core = os.getenv('DC2_OBSHISTID')+'_f'+os.getenv('DC2_FILTER_NUM')+'_'+os.getenv('DC2_SENSORID')+'_E'+exposure
     print 'filename common core = ',core
 
     ## Electron file
@@ -58,7 +59,7 @@ for snap in range(0,int(nsnaps)):
        
     ## Amplifier (e2adc) files
     if os.getenv('DC2_E2ADC') == '1':
-        print 'Harvesting e2adc files not yet supported'
+        log.warning('Harvesting e2adc files not yet supported')
         pass
    
 
