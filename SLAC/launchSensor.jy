@@ -32,6 +32,9 @@ print 'Visit number (obshistid) = ',visit
 cfilter = setupVisit.getVariable('DC2_FILTER')
 print 'Color filter = ',cfilter
 
+cfilterNum = setupVisit.getVariable('DC2_FILTER_NUM')
+print 'Color filter # = ',cfilterNum
+
 centroidfile = setupVisit.getVariable('DC2_CENTROIDFILE')
 print 'Centroid file = ',centroidfile
 

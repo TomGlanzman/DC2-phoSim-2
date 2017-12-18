@@ -31,6 +31,7 @@ def register():
     raytraceID = pipeline.getProcessInstance("RunRaytrace")
     raytraceVars = HashMap(raytraceID.getVariables())
     outputFiles = raytraceVars.get("DC2_OUTPUTLIST")   # list of output data product filenames
+    outputDir = raytraceVars.get("DC2_OUTPURDIR")      # directory containing above files
     ## print '2- raytraceVars.keySet() = ',raytraceVars.keySet()
 
     if outputFiles is None:
@@ -57,7 +58,7 @@ def register():
     outputDir = DC2_OUTPUT                             # NERSC directory containing output data products
     obsHistID = setupVars.get("DC2_OBSHISTID")         # visit ID
     sensorID = DC2_SENSORID                            # sensor ID
-    filterID = setupVars.get("DC2_FILTER")             # filter # (ugrizy => 012345)
+    filterID = setupVars.get("DC2_FILTER_NUM")             # filter # (ugrizy => 012345)
 
     taskVersionPath = pipeline.getTaskVersionPath()     # bookkeeping (taskname, etc.)
     task = taskVersionPath.split("(")[0]
@@ -104,6 +105,7 @@ def register():
     print 'outList = ',outList
     if len(outList) > 0:
         for outFile in outList:
+            outFileFull = os.path.join(outputDir,outFile)
             fn = os.path.basename(outFile)
             print 'fn = ',fn
             if outFile.endswith('.fits'):
@@ -117,9 +119,9 @@ def register():
                 pass
             dType = 'PHOSIM'
 
-            print 'Registration: ',fn,'\n filetype and datatype: ',fType,', ',dType,'\n datacat location: ',datacatRoot,':',group,'\n site:location ',site,':',outFile
+            print 'Registration: ',fn,'\n filetype and datatype: ',fType,', ',dType,'\n datacat location: ',datacatRoot,':',group,'\n site:location ',site,':',outFileFull
 
-            ds = datacatalog.newDataset(fn,fType,dType,datacatRoot,group,site,outFile)
+            ds = datacatalog.newDataset(fn,fType,dType,datacatRoot,group,site,outFileFull)
             datacatalog.registerDataset(ds,md,True)
             pass
         pass
