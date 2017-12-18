@@ -42,24 +42,32 @@ for snap in range(0,int(nsnaps)):
 
     ## Collect phoSim output data product file names
     exposure = "%03d" % snap
-    core = os.getenv('DC2_OBSHISTID')+'_f'+os.getenv('DC2_FILTER_NUM')+'_'+os.getenv('DC2_SENSORID')+'_E'+exposure
-    print 'filename common core = ',core
+    core1 = os.getenv('DC2_OBSHISTID')+'_f'+os.getenv('DC2_FILTER_NUM')+'_'+os.getenv('DC2_SENSORID')
+    core2 = '_E'+exposure
+    print 'filename common core1 = ',core1
+    print 'filename common core2 = ',core2
 
     ## Electron file
-    fElectron = 'lsst_e_'+core+'.fits.gz'
+    fElectron = 'lsst_e_'+core1+core2+'.fits.gz'
     print 'fElectron = ',fElectron
     outputFiles.append(fElectron)
 
     ## Centroid file
     if os.getenv('DC2_CENTROIDFILE') == '1':
-        fCentroid = 'centroid_lsst_e_'+core+'.txt'
+        fCentroid = 'centroid_lsst_e_'+core1+core2+'.txt'
         print 'fCentroid = ',fCentroid
         outputFiles.append(fCentroid)
         pass
        
     ## Amplifier (e2adc) files
     if os.getenv('DC2_E2ADC') == '1':
-        log.warning('Harvesting e2adc files not yet supported')
+        #log.warning('Harvesting e2adc files not yet supported')
+        for a in range(0,18):
+            amp = "_C%0.2i" % a
+            fAmplifier = 'lsst_a_'+core1+amp+core2+'.fits.gz'
+            print 'fAmplifier = ',fAmplifier
+            outputFiles.append(fAmplifier)
+            pass
         pass
    
 
@@ -86,7 +94,16 @@ for snap in range(0,int(nsnaps)):
 
 ## Send list of output files to workflow engine for subsequent registration
 log.info('Prepare list of files to be registered')
-outlist = ','.join(outList)
+outlist = ','.join(outputFiles)
+print 'length of outlist = ',len(outlist)
+
+cmd = 'pipelineSet DC2_OUTPUTDIR '+outDir
+print cmd
+rc = os.system(cmd)
+if rc <> 0 :
+    log.error("Unable to set pipeline variable \n $%s",cmd)
+    sys.exit(99)
+    pass
 cmd = 'pipelineSet DC2_OUTPUTLIST '+outlist
 print cmd
 rc = os.system(cmd)
