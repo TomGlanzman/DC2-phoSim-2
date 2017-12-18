@@ -23,6 +23,9 @@ print 'Number of trim jobs = ',ntrims
 nsnap = setupVisit.getVariable('DC2_NSNAP')
 print 'Number of snaps per visit = ',nsnap
 
+minsource = setupVisit.getVariable('DC2_MINSOURCE')
+print 'Minimum # sources/sensor to enable its simulation = ',minsource
+
 visit = setupVisit.getVariable('DC2_OBSHISTID')
 print 'Visit number (obshistid) = ',visit
 
@@ -41,44 +44,50 @@ print 'outDir = ',outDir
 runTrim = pipeline.getProcessInstance('RunTrim')
 
 sensors = runTrim.getVariable('DC2_SENSORLIST')
-print 'sensors = ',sensors
-sensorList = sensors.split(',')
-print 'sensorsList = ',sensorList
-numSensors = len(sensorList)
+print 'sensors = ',sensors,', type(sensors) = ',type(sensors)
 
-print 'DC2_NUM_SENSORS = ',DC2_NUM_SENSORS
-print 'DC2_SELECTED_SENSORLIST = ',DC2_SELECTED_SENSORLIST
-selectedSensorList = DC2_SELECTED_SENSORLIST.split(',')
-print 'selectedSensorList: ',selectedSensorList
+if sensors != None:
+    sensorList = sensors.split(',')
+    print 'sensorsList = ',sensorList
+    numSensors = len(sensorList)
 
-vars = HashMap()
+    print 'DC2_NUM_SENSORS = ',DC2_NUM_SENSORS
+    print 'DC2_SELECTED_SENSORLIST = ',DC2_SELECTED_SENSORLIST
+    selectedSensorList = DC2_SELECTED_SENSORLIST.split(',')
+    print 'selectedSensorList: ',selectedSensorList
 
-############################################ DEBUG DEBUG DEBUG ############
-############################################ DEBUG DEBUG DEBUG ############
-#numSensors = 1
-#print 'OVERRIDING numSensors: setting to ',numSensors
-############################################ DEBUG DEBUG DEBUG ############
-############################################ DEBUG DEBUG DEBUG ############
+    vars = HashMap()
 
-vars.put("DC2_NTRIMS",ntrims)
-vars.put("DC2_NSNAP",nsnap)
-vars.put("DC2_OBSHISTID",visit)
-vars.put("DC2_FILTER",cfilter)
-vars.put("DC2_CENTROIDFILE",centroidfile)
-vars.put("DC2_TOPLEVEL6",toplevel6)
-vars.put("DC2_PHOSIMOUT",outDir)
+    ############################################ DEBUG DEBUG DEBUG ############
+    ############################################ DEBUG DEBUG DEBUG ############
+    #numSensors = 1
+    #print 'OVERRIDING numSensors: setting to ',numSensors
+    ############################################ DEBUG DEBUG DEBUG ############
+    ############################################ DEBUG DEBUG DEBUG ############
+
+    vars.put("DC2_NTRIMS",ntrims)
+    vars.put("DC2_NSNAP",nsnap)
+    vars.put("DC2_OBSHISTID",visit)
+    vars.put("DC2_FILTER",cfilter)
+    vars.put("DC2_CENTROIDFILE",centroidfile)
+    vars.put("DC2_TOPLEVEL6",toplevel6)
+    vars.put("DC2_PHOSIMOUT",outDir)
 
 
-## The number of sensor jobs = 9(normal raft) or 1(optical path difference)
-numStreams = 0
-for sensor in range(0,numSensors):
-    sensorID = sensorList[sensor]
-    if sensorID not in selectedSensorList: continue   # skip if sensor not needed for this dither pattern
-    print 'Create substream for sensor ',sensorID
-    vars.put("DC2_SENSORID",sensorID)
-    pipeline.createSubstream("singleSensor",sensor,vars)
-    numStreams += 1
+    ## The number of sensor jobs = 9(normal raft) or 1(optical path difference)
+    numStreams = 0
+    for sensor in range(0,numSensors):
+        sensorID = sensorList[sensor]
+        if sensorID not in selectedSensorList: continue   # skip if sensor not needed for this dither pattern
+        print 'Create substream for sensor ',sensorID
+        vars.put("DC2_SENSORID",sensorID)
+        pipeline.createSubstream("singleSensor",sensor,vars)
+        numStreams += 1
+        pass
+
+    print 'Number of sensor sub-streams created = ',numStreams
+else:
+    print 'There are no sensors to simulate in this raft'
     pass
-
-print 'Number of sensor sub-streams created = ',numStreams
+        
 

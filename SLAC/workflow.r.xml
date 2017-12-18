@@ -4,7 +4,7 @@
           xs:schemaLocation="http://glast-ground.slac.stanford.edu/pipeline 
           http://srs.slac.stanford.edu/Pipeline-II/schemas/2.1/pipeline.xsd">
 
-    <task name="DC2-phoSim-2-r" type="LSST" version="0.900">
+    <task name="DC2-phoSim-2-r" type="LSST" version="0.913">
         <notation>Generate r-filter phoSim images for DESC DC2</notation> 
 
         <variables>
@@ -28,7 +28,7 @@
             <var name="logRoot">${DC2_ROOT}/logs</var>
 
             <!-- SLAC locations (scriptlets only) -->
-	    <var name="DC2_SPATH">/nfs/farm/g/desc/u1/Pipeline-tasks</var>
+	    <var name="DC2_SPATH">/nfs/farm/g/lsst/u1/Pipeline-tasks</var>
 	    <var name="DC2_SWORKFLOW">${DC2_SPATH}/${WORKFLOW}</var>
             <var name="DC2_SROOT">${DC2_SPATH}/${TASKNAME}</var>
 
@@ -117,7 +117,7 @@ execfile(DC2_SCONFIGDIR+"/launchTrim.jy")
               <notation>Trim instance catalog for this visit</notation>
               <job maxCPU="${MAXCPU_TRIM}" 
 		   maxMemory="${MAXMEM_TRIM}"
-		   batchOptions="${BATCH_OPTIONS_K} | ${PARTITIONK | -c 2 }" 
+		   batchOptions="${BATCH_OPTIONS_K} | ${PARTITIONK} | -c 2 " 
                    executable="${DC2_CONFIGDIR}/runTrim.sh"
 		   />
             </process>

@@ -5,6 +5,7 @@
 import os,sys
 from java.util import HashMap
 
+
 ### Example: extract pipeline variable
 ## parentPI = pipeline.getProcessInstance('setupVisit')
 ## run = parentPI.getVariable("RUN")
@@ -17,6 +18,9 @@ print 'Number of trim jobs to start = ',ntrims
 
 nsnap = setupVisit.getVariable('DC2_NSNAP')
 print 'Number of snaps per visit = ',nsnap
+
+minsource = setupVisit.getVariable('DC2_MINSOURCE')
+print 'Minimum # sources/sensor to enable simulation = ',minsource
 
 visit = setupVisit.getVariable('DC2_OBSHISTID')
 print 'Visit number (obshistid) = ',visit
@@ -58,6 +62,7 @@ vars = HashMap()
 
 vars.put("DC2_NTRIMS",ntrims)
 vars.put("DC2_NSNAP",nsnap)
+vars.put("DC2_MINSOURCE",minsource)
 vars.put("DC2_OBSHISTID",visit)
 vars.put("DC2_FILTER",cfilter)
 vars.put("DC2_CENTROIDFILE",centroidfile)
