@@ -4,7 +4,7 @@
           xs:schemaLocation="http://glast-ground.slac.stanford.edu/pipeline 
           http://srs.slac.stanford.edu/Pipeline-II/schemas/2.1/pipeline.xsd">
 
-    <task name="DC2-phoSim-2-r" type="LSST" version="0.913">
+    <task name="DC2-phoSim-2-r" type="LSST" version="0.914">
         <notation>Generate r-filter phoSim images for DESC DC2</notation> 
 
         <variables>
@@ -54,7 +54,7 @@
 	    <!-- MAXTIME is wall clock time in seconds - used for scheduling but not enforced by pilot jobs -->
             <var name="MAXTIME_SETUP">1800</var>
             <var name="MAXTIME_TRIM">600</var>
-            <var name="MAXTIME_RAYTRACE">12600</var>
+            <var name="MAXTIME_RAYTRACE">9000</var>
             <!-- Note that native SLURM times are in mm, mm:ss, hh:mm:ss, or dd-hh:mm:ss -->
 
 	    <!-- MAXMEM in kB - used for scheduling but not enforced by pilot jobs -->

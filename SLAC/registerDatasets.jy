@@ -57,7 +57,7 @@ def register():
     outputDir = DC2_OUTPUT                             # NERSC directory containing output data products
     obsHistID = setupVars.get("DC2_OBSHISTID")         # visit ID
     sensorID = DC2_SENSORID                            # sensor ID
-    filterID = setupVars.get("DC2_FILTER")             # filter # (ugrizy => 012345)
+    filterID = setupVars.get("DC2_FILTER_NUM")             # filter # (ugrizy => 012345)
 
     taskVersionPath = pipeline.getTaskVersionPath()     # bookkeeping (taskname, etc.)
     task = taskVersionPath.split("(")[0]
