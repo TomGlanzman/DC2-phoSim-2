@@ -17,6 +17,8 @@ source /global/common/software/lsst/cori-haswell-gcc/stack/setup_w_2017_46_py3_g
 echo "$ "setup lsst_sims
 setup lsst_sims
 
+export PHOSIM_IC_GCR_CATALOGS=/global/projecta/projectdirs/lsst/production/DC2/gcr-catalogs
+
 echo "$ "eups declare gcr_catalogs -r ${PHOSIM_IC_GCR_CATALOGS}  -c
 eups declare gcr_catalogs -r ${PHOSIM_IC_GCR_CATALOGS}  -c
 
@@ -26,26 +28,22 @@ setup gcr_catalogs
 echo "$ "eups list -v gcr_catalogs
 eups list -v gcr_catalogs
 
-## Display the IC generator options (incl. default values)
-echo "$ "/usr/bin/time python ${PHOSIM_IC_GENERATOR} -h
-/usr/bin/time python ${PHOSIM_IC_GENERATOR} -h
 
-## Run the IC generator
-echo "$ "/usr/bin/time python ${PHOSIM_IC_GENERATOR} $options
-echo
-echo
-echo "================== Begin phosim instance catalog generator ============================="
-date
-echo
-/usr/bin/time python ${PHOSIM_IC_GENERATOR} $options
-rc=$?
-echo
-date
-echo "================== End phosim instance catalog generator ============================="
-echo
-echo
-echo "InstanceCatalog generation complete"
+
+echo "$ "cd ${PHOSIM_IC_GCR_CATALOGS}/GCRCatSimInterface/data
+cd ${PHOSIM_IC_GCR_CATALOGS}/GCRCatSimInterface/data
+echo "$ "python get_sed_mags.py
+python get_sed_mags.py
+
+
+
+#export PYTHONPATH=${PHOSIM_IC_GCR_CATALOGS}
+#python "import GCRCatSimInterface; print(GCRCatSimInterface.__version__)"
+
+
+
+
 date
 
-exit $rc
+
 
