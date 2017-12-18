@@ -31,7 +31,7 @@ def register():
     raytraceID = pipeline.getProcessInstance("RunRaytrace")
     raytraceVars = HashMap(raytraceID.getVariables())
     outputFiles = raytraceVars.get("DC2_OUTPUTLIST")   # list of output data product filenames
-    outputDir = raytraceVars.get("DC2_OUTPURDIR")      # directory containing above files
+    outputDir = raytraceVars.get("DC2_OUTPUTDIR")      # directory containing above files
     ## print '2- raytraceVars.keySet() = ',raytraceVars.keySet()
 
     if outputFiles is None:
@@ -55,10 +55,11 @@ def register():
 
 
     ## These data come from env-vars in the processing step
-    outputDir = DC2_OUTPUT                             # NERSC directory containing output data products
+    #outputDir = DC2_OUTPUT                             # NERSC directory containing output data products
     obsHistID = setupVars.get("DC2_OBSHISTID")         # visit ID
     sensorID = DC2_SENSORID                            # sensor ID
-    filterID = setupVars.get("DC2_FILTER_NUM")             # filter # (ugrizy => 012345)
+    filterID = setupVars.get("DC2_FILTER_NUM")         # filter # (012345 -> ugrizy)
+    filter = setupVars.get("DC2_FILTER")               # filter
 
     taskVersionPath = pipeline.getTaskVersionPath()     # bookkeeping (taskname, etc.)
     task = taskVersionPath.split("(")[0]
@@ -71,11 +72,12 @@ def register():
     ## print '3 obsHistID = ',obsHistID
     ## print '4 sensorID = ',sensorID
     ## print '5 filterID = ',filterID
+    ## print '5a filter = ',filter
     ## print '6 taskVersionPath = ',taskVersionPath
     ## print '7 streamPath = ',streamPath
     ## print '8 task = ',task
     ## print '8.5 taskVersion = ',taskVersion
-    ## sys.stdout.flush()
+    sys.stdout.flush()
 
 
 
@@ -93,6 +95,7 @@ def register():
     md.put('nObsHistID',obsHistID)
     md.put('sensorID',sensorID)
     md.put('nFilterID',filterID)
+    md.put('filter',filter)
     md.put('streamPath',streamPath)
     md.put('task',taskVersion)
 
@@ -119,7 +122,7 @@ def register():
                 pass
             dType = 'PHOSIM'
 
-            print 'Registration: ',fn,'\n filetype and datatype: ',fType,', ',dType,'\n datacat location: ',datacatRoot,':',group,'\n site:location ',site,':',outFileFull
+            print 'Registration: ',fn,'\n filetype and datatype: ',fType,', ',dType,'\n datacat location: ',datacatRoot,':',group,'\n site location: ',site,':',outFileFull
 
             ds = datacatalog.newDataset(fn,fType,dType,datacatRoot,group,site,outFileFull)
             datacatalog.registerDataset(ds,md,True)
