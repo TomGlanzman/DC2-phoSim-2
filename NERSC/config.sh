@@ -35,7 +35,8 @@ export DC2_MINMAG=10.0
 export PHOSIM_CATALOGS="/global/cscratch1/sd/descpho/Pipeline-tasks/DC2-phoSim-1/catalogs"
 
 ## physics overrides and other commands for phoSim
-export PHOSIM_COMMANDS=${DC2_CONFIGDIR}/commands.txt
+#export PHOSIM_COMMANDS=${DC2_CONFIGDIR}/commands.txt
+export PHOSIM_COMMANDS=${DC2_PATH}/DC2_Repo/workflows/phosimConfig/commands.txt
 
 ## Global and persistent scratch space to where phoSim 'work' directory will be staged
 export PHOSIM_SCR_ROOT=/global/cscratch1/sd/descpho/Pipeline-tasks/${TASKNAME}
