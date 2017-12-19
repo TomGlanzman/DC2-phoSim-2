@@ -60,9 +60,10 @@ for snap in range(0,int(nsnaps)):
         pass
        
     ## Amplifier (e2adc) files
-    if os.getenv('DC2_E2ADC') == '1':
+    if os.getenv('PHOSIM_E2ADC') == '1':
         #log.warning('Harvesting e2adc files not yet supported')
         for a in range(0,18):
+            if a == 8 or a == 9: continue
             amp = "_C%0.2i" % a
             fAmplifier = 'lsst_a_'+core1+amp+core2+'.fits.gz'
             print 'fAmplifier = ',fAmplifier
