@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline xmlns="http://glast-ground.slac.stanford.edu/pipeline" 
+          xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" 
+          xs:schemaLocation="http://glast-ground.slac.stanford.edu/pipeline 
+          http://srs.slac.stanford.edu/Pipeline-II/schemas/2.1/pipeline.xsd">
+
+    <task name="DC2-phoSim-2-i" type="LSST" version="1.000">
+        <notation>Generate i-filter phoSim images for DESC DC2</notation> 
+
+        <variables>
+	    <var name="DC2_FILTER">i</var>
+
+	    <var name="WORKFLOW">DC2-phoSim-2</var>
+            <var name="TASKNAME">${WORKFLOW}-${DC2_FILTER}</var>
+
+            <!-- Where/how will jobs be run? 
+              CORI = cori-haswell shared queue
+              CORIP = cori Haswell or KNL via 'pilot' -->
+            <var name="JOBSITE">CORIP</var>
+
+            <!-- NERSC locations -->
+	    <var name="DC2_PATH">/global/projecta/projectdirs/lsst/production/DC2</var>
+	    <var name="DC2_WORKFLOW">${DC2_PATH}/${WORKFLOW}</var>
+            <var name="DC2_ROOT">${DC2_PATH}/${TASKNAME}</var>
+
+            <var name="DC2_CONFIGDIR">${DC2_WORKFLOW}/config</var>
+            <var name="DC2_OUTPUT">${DC2_ROOT}/output</var>
+            <var name="logRoot">${DC2_ROOT}/logs</var>
+
+            <!-- SLAC locations (scriptlets only) -->
+	    <var name="DC2_SPATH">/nfs/farm/g/lsst/u1/Pipeline-tasks</var>
+	    <var name="DC2_SWORKFLOW">${DC2_SPATH}/${WORKFLOW}</var>
+            <var name="DC2_SROOT">${DC2_SPATH}/${TASKNAME}</var>
+
+            <var name="DC2_SCONFIGDIR">${DC2_SWORKFLOW}/config</var>
+
+            <!-- SLURM options for NERSC batch (ignored by Pilots) -->
+            <var name="BATCH_QUEUE">shared</var>  <!-- (ignored by Pilots) -->
+            <var name="QOS">normal</var>          <!-- (ignored by Pilots) -->
+            <var name="PARTITIONH">${JOBSITE=="CORIP" ? " -p phoSimH " : " -p ${BATCH_QUEUE} | --qos=${QOS} "}</var>
+            <var name="PARTITIONK">${JOBSITE=="CORIP" ? " -p phoSimK " : " -p ${BATCH_QUEUE} | --qos=${QOS} "}</var>
+
+            <var name="BATCH_OPTIONS_H"> -L SCRATCH,projecta | -C haswell </var>
+            <var name="BATCH_OPTIONS_K"> -L SCRATCH,projecta | -C knl </var>
+
+            <var name="EXTRA_SETUP">${JOBSITE=="CORIP" ? " " : " -c 3 "}</var>
+
+	    <!-- MAXCPU time in seconds - used for scheduling but not enforced by pilot jobs -->
+            <var name="MAXCPU_SETUP">1800</var>
+            <var name="MAXCPU_TRIM">600</var>
+            <var name="MAXCPU_RAYTRACE">12600</var>
+            <!-- Note that native SLURM times are in mm, mm:ss, hh:mm:ss, or dd-hh:mm:ss -->
+
+	    <!-- MAXTIME is wall clock time in seconds - used for scheduling but not enforced by pilot jobs -->
+            <var name="MAXTIME_SETUP">1800</var>
+            <var name="MAXTIME_TRIM">600</var>
+            <var name="MAXTIME_RAYTRACE">9000</var>
+            <!-- Note that native SLURM times are in mm, mm:ss, hh:mm:ss, or dd-hh:mm:ss -->
+
+	    <!-- MAXMEM in kB - used for scheduling but not enforced by pilot jobs -->
+            <var name="MAXMEM_SETUP">2000000</var>
+            <var name="MAXMEM_TRIM">2000000</var>
+            <var name="MAXMEM_RAYTRACE">4000000</var>
+	    <!-- Note that SLURM units are MB -->
+
+            <var name="NTHREADS">8</var>  <!-- number of threads for raytrace -->
+
+            <!-- LSF options for SLAC batch -->
+            <var name="MAXCPU">100</var> <!-- wall clock time limit in seconds-->
+            <var name="SBATCH_OPTIONS"></var>
+
+            <var name="DC2_SIXDIGSTREAM">${format(pipeline.stream,&quot;%06d&quot;)}</var>
+        </variables>
+
+
+        <process name="setupVisit" site="${JOBSITE}">
+          <notation>Setup phoSim inputs and prepare for parallelization</notation>
+          <job maxCPU="${MAXCPU_SETUP}" 
+	       maxMemory="${MAXMEM_SETUP}" 
+	       batchOptions="${BATCH_OPTIONS_H} | ${PARTITIONH} | ${EXTRA_SETUP}" 
+               executable="${DC2_CONFIGDIR}/setupVisit.sh"
+	       />
+        </process>
+
+
+        <process name="launchTrim-jy">
+          <notation>Create trim sub-streams</notation>
+          <script><![CDATA[ 
+execfile(DC2_SCONFIGDIR+"/launchTrim.jy")
+              ]]>
+          </script>
+          <depends>
+            <after process="setupVisit" status="SUCCESS"/>
+          </depends>
+          <createsSubtasks>
+            <subtask>trim</subtask>
+          </createsSubtasks> 
+        </process>
+
+
+        <process name="finishVisit" site="${JOBSITE}">
+          <notation>Setup phoSim inputs and prepare for parallelization</notation>
+          <job maxCPU="${MAXCPU}" 
+	       batchOptions="${BATCH_OPTIONS_H} | ${PARTITIONH}" 
+               executable="${DC2_CONFIGDIR}/finishVisit.sh"
+	       />
+          <depends>
+            <after process="trim.trimDone-jy" status="SUCCESS"/>
+          </depends>
+        </process>
+
+
+
+        <task name="trim" type="LSST">
+
+            <process name="RunTrim" site="${JOBSITE}">
+              <notation>Trim instance catalog for this visit</notation>
+              <job maxCPU="${MAXCPU_TRIM}" 
+		   maxMemory="${MAXMEM_TRIM}"
+		   batchOptions="${BATCH_OPTIONS_K} | ${PARTITIONK} | -c 2 " 
+                   executable="${DC2_CONFIGDIR}/runTrim.sh"
+		   />
+            </process>
+
+
+            <process name="launchSensor-jy">
+                <notation>Create per-CCD sub-streams</notation>
+                <script><![CDATA[ 
+execfile(DC2_SCONFIGDIR+"/launchSensor.jy")
+              ]]>
+                </script>
+                <depends>
+                    <after process="RunTrim" status="SUCCESS"/>
+                </depends>
+                <createsSubtasks>
+                    <subtask>singleSensor</subtask>
+                </createsSubtasks> 
+            </process>
+
+
+            <process name="trimDone-jy">
+                <notation>Create per-CCD sub-streams</notation>
+                <script><![CDATA[ 
+#execfile(DC2_SCONFIGDIR+"/trimDone.jy")
+print 'Dummy scriptlet (allows sub-subtask dependency)'
+              ]]>
+                </script>
+                <depends>
+                    <after process="singleSensor.RegFiles-jy" status="SUCCESS"/>
+                </depends>
+            </process>
+
+
+            <task name="singleSensor" type="LSST">
+
+                <process name="RunRaytrace" site="${JOBSITE}">
+                    <notation>Combined raytrace and e2adc processing steps</notation>
+                    <job maxCPU="${MAXCPU_RAYTRACE}" 
+			 maxMemory="${MAXMEM_RAYTRACE}"
+                         batchOptions="${BATCH_OPTIONS_K} | ${PARTITIONK} | -c ${NTHREADS}" 
+                         executable="${DC2_CONFIGDIR}/runRaytrace.sh"
+			 />
+                </process>
+
+
+                <process name="RegFiles-jy">
+                    <notation>Register phoSim data products in dataCatalog</notation>
+                    <script><![CDATA[ 
+execfile(DC2_SCONFIGDIR+"/registerDatasets.jy")
+                    ]]>
+                    </script>
+                <depends>
+                    <after process="RunRaytrace" status="SUCCESS"/>
+                </depends>
+                </process>
+
+            </task> <!-- end of sensor loop -->
+
+        </task> <!-- end of trim loop -->
+
+    </task> <!-- end of visit -->
+
+</pipeline>
