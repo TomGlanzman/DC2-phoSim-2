@@ -210,8 +210,8 @@ elif os.getenv('PHOSIM_IC_GEN') == 'DYNAMIC':
     opts = ' --db '+os.getenv('DC2_OPSSIM_DB')
     opts += ' --out '+icDir
     opts += ' --id '+visitID
-#    opts += ' --descqa_cat_file protoDC2'
-    opts += ' --descqa_cat_file proto-dc2_v2.1.1'
+    opts += ' --descqa_cat_file protoDC2'
+#    opts += ' --descqa_cat_file proto-dc2_v2.1.1'
 #    opts += ' --min_mag '+minMag
     cmd += opts
     log.info('Generate instanceCatalog.')
