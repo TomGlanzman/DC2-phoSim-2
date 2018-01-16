@@ -4,16 +4,17 @@
 ##
 import os,sys,shutil,gzip
 
-def bye():
+def bye(rc):
     print "\n\n\n"
     print "Debug exit from setupVisit.py"
     print "\n\n\n"
-    sys.exit()
+    sys.exit(rc)
     pass
 
 
 print '\n\nWelcome to setupVisit.py\n========================\n'
 rc = 0
+
 
 ## Setup logging, python style
 import logging as log
