@@ -45,7 +45,7 @@ export PHOSIM_SCR_ROOT=/global/cscratch1/sd/descpho/Pipeline-tasks/${TASKNAME}
 export PHOSIM_SCR_CLEANUP=0
 
 ## Enable or disable the E2ADC step (0=disable, 1=enable)
-export PHOSIM_E2ADC=1
+export PHOSIM_E2ADC=0
 
 ## Crutch for phosim.py which wants to call the condor submit script
 export PATH=${PATH}\:${DC2_WORKFLOW}/bin
