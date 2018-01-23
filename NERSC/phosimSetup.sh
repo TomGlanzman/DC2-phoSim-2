@@ -1,8 +1,10 @@
 ## phosimSetup.sh - establish cori environment to run phoSim (and DMTCP)
 
 ## Select phoSim version
-version=v3.7.1   # Nov 2017
-version=v3.7.6   # 6 Dec 2017
+#version=v3.7.1   # Nov 2017
+#version=v3.7.6   # 6 Dec 2017
+#version=v3.7.7   # 22 Jan 2018
+version=v3.7.8   # 23 Jan 2018
 
 ## Select compiler used to build phoSim
 #compiler=gcc
@@ -10,21 +12,23 @@ compiler=intel
 
 ## Determine if running on knl, or haswell node, and whether batch or
 ## interactive
-node=haswell
+partition=haswell
 mode=batch
-if [[ ! -z "$SLURM_JOB_PARTITION" ]]; then
-#    if echo "$SLURM_JOB_PARTITION" | grep -q "knl"; then
-    if [[ "$SLURM_JOB_PARTITION" =~ "knl" ]]; then
-	node=knl
-    fi
+host=`hostname`
+
+if [[ -n "$SLURM_JOB_PARTITION" ]]; then
+    foo=`grep -c -i phi /proc/cpuinfo`
+    if [[ $foo > 0 ]]; then
+	partition=knl
+	fi
 else
     mode=interactive
 fi
 
-echo "Running on Cori-"$node
+echo "Running on Cori-"$partition", host "$host
 
 ## Code pointers
-arch=cori-${node}-${compiler}
+arch=cori-${partition}-${compiler}
 export PHOSIM_ROOT=/global/common/software/lsst/${arch}/phosim/${version}
 export DMTCP_ROOT=/global/common/cori/contrib/lsst/dmtcp/2.4.5
 
