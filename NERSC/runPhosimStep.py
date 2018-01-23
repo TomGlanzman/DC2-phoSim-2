@@ -58,7 +58,13 @@ def runPhosimStep(step,snap=0):
                 nlines += 1
                 print line.strip()
                 foo = line.split('=')
-                jobParms[foo[0].strip()] = foo[1].strip()
+                mykey = foo[0].strip()
+                jobParms[mykey] = foo[1].strip()
+                if mykey == 'executable':
+                    jobParms[mykey]=os.path.join(os.environ['PHOSIM_ROOT'],jobParms[mykey].split('/')[-2],jobParms[mykey].split('/')[-1])
+                    print '--Overriding "executable" with:'
+                    print mykey,' = ',jobParms[mykey]
+                pass
             pass
         pass
     print '----------------------------------------\n# useful lines in submit file = ',nlines
